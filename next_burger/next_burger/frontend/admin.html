@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Burger — Админ-панель</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;color:#171211;background:#f4f2f0;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,textarea,select{font-family:inherit;font-size:1rem}
+a{color:inherit;text-decoration:none}
+
+/* Topbar */
+.admin-top{background:#171211;color:#fff;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
+.admin-top .brand{display:flex;align-items:center;gap:.6rem;font-weight:900;font-size:1.15rem}
+.admin-top .brand .logo{width:34px;height:34px;background:#ff6600;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.admin-top .brand small{display:block;font-weight:600;font-size:.7rem;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em}
+.admin-top-actions{display:flex;align-items:center;gap:1rem;font-size:.9rem}
+.admin-top-actions a,.admin-top-actions button{color:#cbd5e1;font-weight:700;font-size:.9rem}
+.admin-top-actions a:hover,.admin-top-actions button:hover{color:#fff}
+.admin-top .who{color:#9ca3af}
+
+.wrap{max-width:1200px;margin:0 auto;padding:1.5rem 2rem 4rem}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:1rem;margin-bottom:1.5rem}
+.stat{background:#fff;border-radius:14px;padding:1rem 1.1rem;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.stat .v{font-size:1.6rem;font-weight:900;line-height:1.1}
+.stat .l{color:#9ca3af;font-size:.8rem;font-weight:700;margin-top:.2rem}
+.stat.accent .v{color:#ff6600}
+
+/* Tabs */
+.tabs{display:inline-flex;gap:.25rem;background:#fff;padding:.3rem;border-radius:14px;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,.05);flex-wrap:wrap}
+.tabs button{padding:.6rem 1.2rem;border-radius:10px;font-weight:700;color:#555;font-size:.95rem}
+.tabs button.active{background:#ff6600;color:#fff}
+
+/* Toolbar */
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:1rem;flex-wrap:wrap}
+.toolbar h2{font-size:1.4rem;font-weight:800}
+.btn-add{background:#ff6600;color:#fff;height:44px;padding:0 1.3rem;border-radius:12px;font-weight:700;display:inline-flex;align-items:center;gap:.45rem}
+.btn-add:hover{background:#e65c00}
+
+/* Cards / lists */
+.panel{background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.cat-block{margin-bottom:1.5rem}
+.cat-block:last-child{margin-bottom:0}
+.cat-block h3{font-size:1.05rem;font-weight:800;margin-bottom:.75rem;color:#ff6600}
+.row-item{display:flex;align-items:center;gap:1rem;padding:.75rem;border:1px solid #f0f0f0;border-radius:12px;margin-bottom:.6rem}
+.row-item:last-child{margin-bottom:0}
+.row-item img{width:54px;height:54px;border-radius:10px;object-fit:cover;background:#fff5ee;flex-shrink:0}
+.row-item .info{flex:1;min-width:0}
+.row-item .info .nm{font-weight:700}
+.row-item .info .meta{color:#9ca3af;font-size:.82rem;margin-top:.15rem}
+.row-item .price{font-weight:800;white-space:nowrap}
+.row-actions{display:flex;gap:.4rem}
+.icon-btn{width:36px;height:36px;border-radius:9px;border:1px solid #e5e5e5;display:flex;align-items:center;justify-content:center;background:#fff;transition:all .15s}
+.icon-btn:hover{border-color:#ff6600;color:#ff6600}
+.icon-btn.danger:hover{border-color:#ef4444;color:#ef4444}
+.badge{display:inline-block;padding:.12rem .5rem;border-radius:999px;font-size:.72rem;font-weight:700;background:#fff5ee;color:#ff6600;margin-left:.4rem}
+.empty{color:#9ca3af;text-align:center;padding:2rem}
+
+/* Orders */
+.order-row{border:1px solid #f0f0f0;border-radius:12px;padding:1rem;margin-bottom:.75rem}
+.order-row .oh{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.order-row .oh b{font-size:1rem}
+.order-row .ometa{color:#9ca3af;font-size:.82rem;margin:.35rem 0}
+.order-row .oitems{font-size:.85rem;color:#555;line-height:1.5;margin-top:.4rem;border-top:1px dashed #eee;padding-top:.5rem}
+.order-row .ofoot{display:flex;justify-content:space-between;align-items:center;margin-top:.6rem;gap:1rem;flex-wrap:wrap}
+.status-badge{display:inline-block;padding:.2rem .65rem;border-radius:999px;font-size:.75rem;font-weight:700}
+.status-new{background:#eff6ff;color:#2563eb}
+.status-cooking{background:#fff7ed;color:#ea580c}
+.status-delivering{background:#faf5ff;color:#9333ea}
+.status-done{background:#f0fdf4;color:#16a34a}
+.status-cancelled{background:#fef2f2;color:#dc2626}
+.status-select{height:38px;border:1px solid #e5e5e5;border-radius:9px;padding:0 .6rem;font-weight:700}
+
+/* Dialog */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:60;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
+.overlay.active{display:flex}
+.dialog{background:#fff;border-radius:18px;width:620px;max-width:100%;padding:1.75rem;position:relative;margin:auto}
+.dialog h2{font-size:1.3rem;font-weight:800;margin-bottom:1.25rem}
+.dialog-close{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.dialog-close:hover{background:rgba(0,0,0,.1)}
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:.83rem;font-weight:700;margin-bottom:.35rem;color:#444}
+.field input,.field textarea,.field select{width:100%;height:44px;border:1px solid #e5e5e5;border-radius:11px;padding:0 .85rem;outline:none}
+.field textarea{height:auto;min-height:64px;padding:.6rem .85rem;resize:vertical}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:#ff6600}
+.row2{display:flex;gap:.75rem}
+.row2>*{flex:1}
+.check-row{display:flex;align-items:center;gap:.5rem;font-weight:700;cursor:pointer;margin-bottom:1rem}
+.check-row input{width:18px;height:18px;accent-color:#ff6600}
+.dialog-error{background:#fef2f2;color:#dc2626;padding:.6rem .9rem;border-radius:10px;font-size:.85rem;margin-bottom:1rem;display:none}
+.dialog-error.show{display:block}
+.dialog-submit{background:#ff6600;color:#fff;height:48px;width:100%;border-radius:12px;font-weight:700;font-size:1rem;margin-top:.5rem}
+.dialog-submit:hover{background:#e65c00}
+.dialog-submit:disabled{opacity:.6}
+
+/* image picker */
+.img-pick{display:flex;gap:.75rem;align-items:center}
+.img-pick .preview{width:64px;height:64px;border-radius:11px;object-fit:cover;background:#fff5ee;border:1px solid #eee;flex-shrink:0}
+.img-pick .grow{flex:1}
+.file-btn{height:44px;border:1px dashed #ff9a4d;color:#ff6600;border-radius:11px;padding:0 .9rem;font-weight:700;white-space:nowrap}
+.file-btn:hover{background:#fff5ee}
+
+/* ingredient chips */
+.ing-pick{display:grid;grid-template-columns:repeat(2,1fr);gap:.4rem;max-height:170px;overflow-y:auto;border:1px solid #f0f0f0;border-radius:11px;padding:.6rem}
+.ing-pick label{display:flex;align-items:center;gap:.45rem;font-size:.86rem;cursor:pointer}
+.ing-pick input{width:16px;height:16px;accent-color:#ff6600}
+
+/* variants editor */
+.var-row{display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem}
+.var-row select,.var-row input{height:40px;border:1px solid #e5e5e5;border-radius:9px;padding:0 .6rem}
+.var-row .vsize{flex:1.4}.var-row .vtype{flex:1.4}.var-row .vprice{flex:1}
+.var-row .del{color:#ef4444;font-size:1.2rem;width:34px;flex-shrink:0}
+.add-var{color:#ff6600;font-weight:700;font-size:.88rem;margin-top:.25rem}
+
+/* Login */
+.login-screen{min-height:90vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+.login-box{background:#fff;border-radius:20px;padding:2.25rem;width:400px;max-width:100%;box-shadow:0 10px 40px rgba(0,0,0,.08)}
+.login-box .logo{width:54px;height:54px;background:#ff6600;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 1rem}
+.login-box h1{text-align:center;font-size:1.4rem;font-weight:900;margin-bottom:.25rem}
+.login-box .sub{text-align:center;color:#9ca3af;font-size:.9rem;margin-bottom:1.5rem}
+.login-hint{text-align:center;color:#9ca3af;font-size:.82rem;margin-top:1rem}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:#171211;color:#fff;padding:1rem 1.5rem;border-radius:12px;font-weight:600;z-index:200;opacity:0;transform:translateY(20px);transition:all .3s;pointer-events:none;max-width:90vw}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.error{background:#dc2626}
+
+@media(max-width:780px){.stats{grid-template-columns:repeat(3,1fr)}.dialog{width:100%}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen" style="display:none">
+  <div class="login-box">
+    <div class="logo">🍔</div>
+    <h1>Next Burger</h1>
+    <div class="sub">Вход в админ-панель</div>
+    <div class="dialog-error" id="loginError"></div>
+    <form onsubmit="doAdminLogin(event)">
+      <div class="field"><label>E-mail</label><input type="email" id="loginEmail" value="admin@nextburger.ru" required></div>
+      <div class="field"><label>Пароль</label><input type="password" id="loginPassword" value="" placeholder="Пароль" required></div>
+      <button type="submit" class="dialog-submit" id="loginBtn">Войти</button>
+    </form>
+    <div class="login-hint">По умолчанию: admin@nextburger.ru / admin123</div>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="adminApp" style="display:none">
+  <div class="admin-top">
+    <div class="brand"><span class="logo">🍔</span><div>Next Burger<small>Админ-панель</small></div></div>
+    <div class="admin-top-actions">
+      <span class="who" id="whoami"></span>
+      <a id="siteLink" href="/" target="_blank">↗ На сайт</a>
+      <button onclick="adminLogout()">Выйти</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="stats" id="statsRow"></div>
+
+    <div class="tabs">
+      <button class="active" data-tab="products" onclick="switchTab('products')">Товары</button>
+      <button data-tab="ingredients" onclick="switchTab('ingredients')">Ингредиенты</button>
+      <button data-tab="categories" onclick="switchTab('categories')">Категории</button>
+      <button data-tab="orders" onclick="switchTab('orders')">Заказы</button>
+    </div>
+
+    <div id="tabContent"></div>
+  </div>
+</div>
+
+<!-- PRODUCT DIALOG -->
+<div class="overlay" id="productDialog">
+  <div class="dialog">
+    <button class="dialog-close" onclick="closeOverlay('productDialog')">×</button>
+    <h2 id="productDialogTitle">Новый товар</h2>
+    <div class="dialog-error" id="productError"></div>
+    <div class="field"><label>Название</label><input type="text" id="pName" placeholder="Напр. Двойной Чизбургер"></div>
+    <div class="row2">
+      <div class="field"><label>Категория</label><select id="pCategory"></select></div>
+      <div class="field"><label>&nbsp;</label>
+        <label class="check-row"><input type="checkbox" id="pConstructor" onchange="onConstructorToggle()"> Конструктор (размер/тип/добавки)</label>
+      </div>
+    </div>
+    <div class="field"><label>Описание (необязательно)</label><textarea id="pDescription" placeholder="Короткое описание"></textarea></div>
+    <div class="field"><label>Изображение</label>
+      <div class="img-pick">
+        <img class="preview" id="pImagePreview" src="" alt="">
+        <div class="grow"><input type="text" id="pImageUrl" placeholder="URL картинки или загрузите файл →" oninput="updateImgPreview()"></div>
+        <button type="button" class="file-btn" onclick="document.getElementById('pImageFile').click()">Загрузить</button>
+        <input type="file" id="pImageFile" accept="image/*" style="display:none" onchange="uploadImage(this)">
+      </div>
+    </div>
+
+    <div id="constructorBlock" style="display:none">
+      <div class="field"><label>Доступные добавки</label>
+        <div class="ing-pick" id="pIngredients"></div>
+      </div>
+      <div class="field"><label>Варианты (размер / тип / цена ₽)</label>
+        <div id="variantRows"></div>
+        <button type="button" class="add-var" onclick="addVariantRow()">+ Добавить вариант</button>
+      </div>
+    </div>
+    <div id="simpleBlock">
+      <div class="field"><label>Цена, ₽</label><input type="number" id="pSimplePrice" min="0" placeholder="299"></div>
+    </div>
+
+    <button class="dialog-submit" id="pSubmit" onclick="saveProduct()">Сохранить</button>
+  </div>
+</div>
+
+<!-- INGREDIENT DIALOG -->
+<div class="overlay" id="ingredientDialog">
+  <div class="dialog" style="width:460px">
+    <button class="dialog-close" onclick="closeOverlay('ingredientDialog')">×</button>
+    <h2 id="ingredientDialogTitle">Новый ингредиент</h2>
+    <div class="dialog-error" id="ingredientError"></div>
+    <div class="field"><label>Название</label><input type="text" id="iName" placeholder="Напр. Бекон"></div>
+    <div class="field"><label>Цена добавки, ₽</label><input type="number" id="iPrice" min="0" placeholder="59"></div>
+    <div class="field"><label>Изображение</label>
+      <div class="img-pick">
+        <img class="preview" id="iImagePreview" src="" alt="">
+        <div class="grow"><input type="text" id="iImageUrl" placeholder="URL картинки или загрузите файл →" oninput="updateIngImgPreview()"></div>
+        <button type="button" class="file-btn" onclick="document.getElementById('iImageFile').click()">Загрузить</button>
+        <input type="file" id="iImageFile" accept="image/*" style="display:none" onchange="uploadIngImage(this)">
+      </div>
+    </div>
+    <button class="dialog-submit" id="iSubmit" onclick="saveIngredient()">Сохранить</button>
+  </div>
+</div>
+
+<!-- CATEGORY DIALOG -->
+<div class="overlay" id="categoryDialog">
+  <div class="dialog" style="width:420px">
+    <button class="dialog-close" onclick="closeOverlay('categoryDialog')">×</button>
+    <h2 id="categoryDialogTitle">Новая категория</h2>
+    <div class="dialog-error" id="categoryError"></div>
+    <div class="field"><label>Название</label><input type="text" id="cName" placeholder="Напр. Десерты"></div>
+    <div class="field"><label>Порядок сортировки</label><input type="number" id="cSort" value="0"></div>
+    <button class="dialog-submit" id="cSubmit" onclick="saveCategory()">Сохранить</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = location.protocol === 'file:' ? 'http://localhost:8000' : '';
+let token = localStorage.getItem('nb_token') || null;
+let me = null;
+let categories = [], ingredients = [], products = [], orders = [];
+let currentTab = 'products';
+let editingProductId = null, editingIngredientId = null, editingCategoryId = null;
+let variantState = []; // [{size,type,price}]
+
+const sizeNames = {20:'Маленький',30:'Средний',40:'Большой'};
+const typeNames = {1:'Классический',2:'Острый'};
+const statusInfo = {
+  new:{label:'Новый',cls:'status-new'}, cooking:{label:'Готовится',cls:'status-cooking'},
+  delivering:{label:'Доставляется',cls:'status-delivering'}, done:{label:'Выполнен',cls:'status-done'},
+  cancelled:{label:'Отменён',cls:'status-cancelled'},
+};
+const statusOrder = ['new','cooking','delivering','done','cancelled'];
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+async function api(path, opts={}){
+  const headers = Object.assign({}, opts.headers||{});
+  const isForm = opts.body instanceof FormData;
+  if (opts.body && !isForm && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  let res;
+  try { res = await fetch(API + path, Object.assign({}, opts, {headers})); }
+  catch(e){ throw new Error('Нет связи с сервером. Запущен ли он?'); }
+  if (!res.ok){
+    let msg = 'Ошибка ' + res.status;
+    try { const e = await res.json(); if (e && e.detail){ msg = typeof e.detail==='string' ? e.detail : (Array.isArray(e.detail)&&e.detail[0]?.msg ? e.detail[0].msg : JSON.stringify(e.detail)); } } catch(_){}
+    const err = new Error(msg); err.status = res.status; throw err;
+  }
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+let toastTimer;
+function showToast(text, isError){
+  const t = document.getElementById('toast');
+  t.textContent = text; t.classList.toggle('error', !!isError); t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+function openOverlay(id){ document.getElementById(id).classList.add('active'); document.body.style.overflow='hidden'; }
+function closeOverlay(id){ document.getElementById(id).classList.remove('active'); if(!document.querySelector('.overlay.active')) document.body.style.overflow=''; }
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) closeOverlay(o.id); }));
+
+// ==================== AUTH ====================
+async function doAdminLogin(e){
+  e.preventDefault();
+  const errEl = document.getElementById('loginError'); errEl.classList.remove('show');
+  const btn = document.getElementById('loginBtn'); btn.disabled = true;
+  try {
+    const data = await api('/api/auth/login', {method:'POST', body: JSON.stringify({
+      email: document.getElementById('loginEmail').value.trim(),
+      password: document.getElementById('loginPassword').value
+    })});
+    if (data.user.role !== 'admin'){ throw new Error('Этот аккаунт не является администратором'); }
+    token = data.token; me = data.user;
+    localStorage.setItem('nb_token', token); localStorage.setItem('nb_user', JSON.stringify(me));
+    showAdmin();
+  } catch(err){ errEl.textContent = err.message; errEl.classList.add('show'); }
+  finally { btn.disabled = false; }
+}
+function adminLogout(){
+  token=null; me=null;
+  localStorage.removeItem('nb_token'); localStorage.removeItem('nb_user');
+  document.getElementById('adminApp').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+}
+function showLogin(){ document.getElementById('loginScreen').style.display='flex'; document.getElementById('adminApp').style.display='none'; }
+
+async function showAdmin(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('adminApp').style.display='block';
+  document.getElementById('whoami').textContent = me ? me.email : '';
+  document.getElementById('siteLink').href = API + '/';
+  await loadAll();
+  switchTab(currentTab);
+}
+
+async function loadAll(){
+  try {
+    [categories, ingredients, products, orders] = await Promise.all([
+      api('/api/categories'), api('/api/ingredients'), api('/api/admin/products'), api('/api/admin/orders')
+    ]);
+    renderStats();
+  } catch(err){
+    if (err.status === 401 || err.status === 403){ adminLogout(); showToast('Сессия истекла, войдите снова', true); }
+    else showToast(err.message, true);
+  }
+}
+
+async function renderStats(){
+  try {
+    const s = await api('/api/admin/stats');
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat"><div class="v">${s.products}</div><div class="l">Товаров</div></div>
+      <div class="stat"><div class="v">${s.categories}</div><div class="l">Категорий</div></div>
+      <div class="stat"><div class="v">${s.ingredients}</div><div class="l">Ингредиентов</div></div>
+      <div class="stat"><div class="v">${s.orders}</div><div class="l">Заказов</div></div>
+      <div class="stat"><div class="v">${s.users}</div><div class="l">Пользователей</div></div>
+      <div class="stat accent"><div class="v">${s.revenue} ₽</div><div class="l">Выручка</div></div>`;
+  } catch(_){}
+}
+
+// ==================== TABS ====================
+function switchTab(tab){
+  currentTab = tab;
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  if (tab==='products') renderProductsTab();
+  else if (tab==='ingredients') renderIngredientsTab();
+  else if (tab==='categories') renderCategoriesTab();
+  else if (tab==='orders') renderOrdersTab();
+}
+
+function catName(id){ const c = categories.find(c=>c.id===id); return c ? c.name : '—'; }
+
+// ==================== PRODUCTS TAB ====================
+function renderProductsTab(){
+  let blocks = categories.map(cat => {
+    const prods = products.filter(p => p.categoryId === cat.id);
+    if (!prods.length) return '';
+    const rows = prods.map(p => {
+      const priceLabel = p.isConstructor ? ('от ' + p.minPrice + ' ₽') : (p.minPrice + ' ₽');
+      const meta = p.isConstructor ? `Конструктор · ${p.items.length} вар. · ${p.ingredientIds.length} добавок` : 'Простой товар';
+      return `<div class="row-item">
+        <img src="${esc(p.imageUrl)}" alt="" onerror="this.style.visibility='hidden'">
+        <div class="info"><div class="nm">${esc(p.name)}${p.isConstructor?'<span class="badge">конструктор</span>':''}</div>
+          <div class="meta">${meta}</div></div>
+        <div class="price">${priceLabel}</div>
+        <div class="row-actions">
+          <button class="icon-btn" title="Изменить" onclick="editProduct(${p.id})">✎</button>
+          <button class="icon-btn danger" title="Удалить" onclick="deleteProduct(${p.id})">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="cat-block"><h3>${esc(cat.name)}</h3>${rows}</div>`;
+  }).join('');
+  if (!blocks) blocks = '<div class="empty">Товаров пока нет. Нажмите «Добавить товар».</div>';
+  document.getElementById('tabContent').innerHTML = `
+    <div class="toolbar"><h2>Товары</h2><button class="btn-add" onclick="newProduct()">＋ Добавить товар</button></div>
+    <div class="panel">${blocks}</div>`;
+}
+
+function fillCategorySelect(){
+  document.getElementById('pCategory').innerHTML = categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+}
+function fillIngredientPicker(selected){
+  const sel = new Set(selected||[]);
+  document.getElementById('pIngredients').innerHTML = ingredients.map(i =>
+    `<label><input type="checkbox" value="${i.id}" ${sel.has(i.id)?'checked':''}> ${esc(i.name)} <span style="color:#9ca3af">+${i.price}₽</span></label>`
+  ).join('') || '<span style="color:#9ca3af">Сначала добавьте ингредиенты</span>';
+}
+function renderVariantRows(){
+  const cont = document.getElementById('variantRows');
+  cont.innerHTML = variantState.map((v,idx) => `
+    <div class="var-row">
+      <select class="vsize" onchange="variantState[${idx}].size=this.value===''?null:+this.value">
+        ${[['','—'],['20','Маленький'],['30','Средний'],['40','Большой']].map(([val,lbl])=>`<option value="${val}" ${String(v.size??'')===val?'selected':''}>${lbl}</option>`).join('')}
+      </select>
+      <select class="vtype" onchange="variantState[${idx}].type=this.value===''?null:+this.value">
+        ${[['','—'],['1','Классический'],['2','Острый']].map(([val,lbl])=>`<option value="${val}" ${String(v.type??'')===val?'selected':''}>${lbl}</option>`).join('')}
+      </select>
+      <input class="vprice" type="number" min="0" value="${v.price??''}" placeholder="₽" oninput="variantState[${idx}].price=+this.value">
+      <button class="del" title="Удалить" onclick="variantState.splice(${idx},1);renderVariantRows()">×</button>
+    </div>`).join('');
+}
+function addVariantRow(){ variantState.push({size:30,type:1,price:0}); renderVariantRows(); }
+function onConstructorToggle(){
+  const on = document.getElementById('pConstructor').checked;
+  document.getElementById('constructorBlock').style.display = on ? 'block' : 'none';
+  document.getElementById('simpleBlock').style.display = on ? 'none' : 'block';
+  if (on && variantState.length===0) addVariantRow();
+}
+function updateImgPreview(){ document.getElementById('pImagePreview').src = document.getElementById('pImageUrl').value || ''; }
+
+function newProduct(){
+  editingProductId = null;
+  document.getElementById('productDialogTitle').textContent = 'Новый товар';
+  document.getElementById('productError').classList.remove('show');
+  fillCategorySelect();
+  document.getElementById('pName').value = '';
+  document.getElementById('pDescription').value = '';
+  document.getElementById('pImageUrl').value = '';
+  document.getElementById('pSimplePrice').value = '';
+  document.getElementById('pConstructor').checked = false;
+  updateImgPreview();
+  variantState = [];
+  fillIngredientPicker([]);
+  onConstructorToggle();
+  openOverlay('productDialog');
+}
+function editProduct(id){
+  const p = products.find(x=>x.id===id); if(!p) return;
+  editingProductId = id;
+  document.getElementById('productDialogTitle').textContent = 'Изменить товар';
+  document.getElementById('productError').classList.remove('show');
+  fillCategorySelect();
+  document.getElementById('pName').value = p.name;
+  document.getElementById('pCategory').value = p.categoryId;
+  document.getElementById('pDescription').value = p.description || '';
+  document.getElementById('pImageUrl').value = p.imageUrl || '';
+  document.getElementById('pConstructor').checked = p.isConstructor;
+  updateImgPreview();
+  fillIngredientPicker(p.ingredientIds || []);
+  if (p.isConstructor){
+    variantState = p.items.map(v=>({size:v.size, type:v.type, price:v.price}));
+    if (!variantState.length) variantState = [{size:30,type:1,price:0}];
+  } else {
+    variantState = [];
+    document.getElementById('pSimplePrice').value = p.items[0] ? p.items[0].price : '';
+  }
+  onConstructorToggle();
+  renderVariantRows();
+  openOverlay('productDialog');
+}
+async function uploadImage(input){
+  if (!input.files || !input.files[0]) return;
+  const fd = new FormData(); fd.append('file', input.files[0]);
+  try {
+    const r = await api('/api/admin/upload', {method:'POST', body: fd});
+    document.getElementById('pImageUrl').value = r.url;
+    updateImgPreview();
+    showToast('Картинка загружена');
+  } catch(err){ showToast(err.message, true); }
+  input.value = '';
+}
+async function saveProduct(){
+  const errEl = document.getElementById('productError'); errEl.classList.remove('show');
+  const isConstructor = document.getElementById('pConstructor').checked;
+  let items;
+  if (isConstructor){
+    items = variantState.filter(v => v.price !== '' && v.price != null).map(v => ({size: v.size ?? null, type: v.type ?? null, price: +v.price}));
+    if (!items.length){ errEl.textContent='Добавьте хотя бы один вариант с ценой'; errEl.classList.add('show'); return; }
+  } else {
+    const price = +document.getElementById('pSimplePrice').value;
+    if (!price && price !== 0){ errEl.textContent='Укажите цену'; errEl.classList.add('show'); return; }
+    items = [{size:null, type:null, price}];
+  }
+  const selectedIngs = isConstructor
+    ? [...document.querySelectorAll('#pIngredients input:checked')].map(c=>+c.value)
+    : [];
+  const payload = {
+    name: document.getElementById('pName').value.trim(),
+    imageUrl: document.getElementById('pImageUrl').value.trim(),
+    categoryId: +document.getElementById('pCategory').value,
+    isConstructor,
+    description: document.getElementById('pDescription').value.trim(),
+    ingredientIds: selectedIngs,
+    items
+  };
+  if (!payload.name){ errEl.textContent='Введите название'; errEl.classList.add('show'); return; }
+  const btn = document.getElementById('pSubmit'); btn.disabled=true;
+  try {
+    if (editingProductId) await api('/api/admin/products/'+editingProductId, {method:'PUT', body: JSON.stringify(payload)});
+    else await api('/api/admin/products', {method:'POST', body: JSON.stringify(payload)});
+    closeOverlay('productDialog');
+    showToast(editingProductId ? 'Товар обновлён' : 'Товар добавлен');
+    await loadAll(); renderProductsTab();
+  } catch(err){ errEl.textContent=err.message; errEl.classList.add('show'); }
+  finally { btn.disabled=false; }
+}
+async function deleteProduct(id){
+  const p = products.find(x=>x.id===id);
+  if (!confirm(`Удалить товар «${p?p.name:''}»?`)) return;
+  try { await api('/api/admin/products/'+id, {method:'DELETE'}); showToast('Товар удалён'); await loadAll(); renderProductsTab(); }
+  catch(err){ showToast(err.message, true); }
+}
+
+// ==================== INGREDIENTS TAB ====================
+function renderIngredientsTab(){
+  const rows = ingredients.map(i => `
+    <div class="row-item">
+      <img src="${esc(i.imageUrl)}" alt="" onerror="this.style.visibility='hidden'">
+      <div class="info"><div class="nm">${esc(i.name)}</div><div class="meta">Добавка</div></div>
+      <div class="price">+${i.price} ₽</div>
+      <div class="row-actions">
+        <button class="icon-btn" onclick="editIngredient(${i.id})">✎</button>
+        <button class="icon-btn danger" onclick="deleteIngredient(${i.id})">🗑</button>
+      </div>
+    </div>`).join('') || '<div class="empty">Ингредиентов пока нет.</div>';
+  document.getElementById('tabContent').innerHTML = `
+    <div class="toolbar"><h2>Ингредиенты</h2><button class="btn-add" onclick="newIngredient()">＋ Добавить ингредиент</button></div>
+    <div class="panel">${rows}</div>`;
+}
+function updateIngImgPreview(){ document.getElementById('iImagePreview').src = document.getElementById('iImageUrl').value || ''; }
+function newIngredient(){
+  editingIngredientId = null;
+  document.getElementById('ingredientDialogTitle').textContent = 'Новый ингредиент';
+  document.getElementById('ingredientError').classList.remove('show');
+  document.getElementById('iName').value=''; document.getElementById('iPrice').value='';
+  document.getElementById('iImageUrl').value=''; updateIngImgPreview();
+  openOverlay('ingredientDialog');
+}
+function editIngredient(id){
+  const i = ingredients.find(x=>x.id===id); if(!i) return;
+  editingIngredientId = id;
+  document.getElementById('ingredientDialogTitle').textContent = 'Изменить ингредиент';
+  document.getElementById('ingredientError').classList.remove('show');
+  document.getElementById('iName').value=i.name; document.getElementById('iPrice').value=i.price;
+  document.getElementById('iImageUrl').value=i.imageUrl||''; updateIngImgPreview();
+  openOverlay('ingredientDialog');
+}
+async function uploadIngImage(input){
+  if (!input.files || !input.files[0]) return;
+  const fd = new FormData(); fd.append('file', input.files[0]);
+  try { const r = await api('/api/admin/upload', {method:'POST', body: fd}); document.getElementById('iImageUrl').value=r.url; updateIngImgPreview(); showToast('Картинка загружена'); }
+  catch(err){ showToast(err.message, true); }
+  input.value='';
+}
+async function saveIngredient(){
+  const errEl = document.getElementById('ingredientError'); errEl.classList.remove('show');
+  const payload = { name: document.getElementById('iName').value.trim(), price: +document.getElementById('iPrice').value||0, imageUrl: document.getElementById('iImageUrl').value.trim() };
+  if (!payload.name){ errEl.textContent='Введите название'; errEl.classList.add('show'); return; }
+  const btn = document.getElementById('iSubmit'); btn.disabled=true;
+  try {
+    if (editingIngredientId) await api('/api/admin/ingredients/'+editingIngredientId, {method:'PUT', body: JSON.stringify(payload)});
+    else await api('/api/admin/ingredients', {method:'POST', body: JSON.stringify(payload)});
+    closeOverlay('ingredientDialog'); showToast('Сохранено'); await loadAll(); renderIngredientsTab();
+  } catch(err){ errEl.textContent=err.message; errEl.classList.add('show'); }
+  finally { btn.disabled=false; }
+}
+async function deleteIngredient(id){
+  const i = ingredients.find(x=>x.id===id);
+  if (!confirm(`Удалить ингредиент «${i?i.name:''}»? Он исчезнет из состава товаров.`)) return;
+  try { await api('/api/admin/ingredients/'+id, {method:'DELETE'}); showToast('Удалено'); await loadAll(); renderIngredientsTab(); }
+  catch(err){ showToast(err.message, true); }
+}
+
+// ==================== CATEGORIES TAB ====================
+function renderCategoriesTab(){
+  const rows = categories.map(c => {
+    const count = products.filter(p=>p.categoryId===c.id).length;
+    return `<div class="row-item">
+      <div class="info" style="margin-left:.5rem"><div class="nm">${esc(c.name)}</div><div class="meta">Товаров: ${count}</div></div>
+      <div class="row-actions">
+        <button class="icon-btn" onclick="editCategory(${c.id})">✎</button>
+        <button class="icon-btn danger" onclick="deleteCategory(${c.id})">🗑</button>
+      </div></div>`;
+  }).join('') || '<div class="empty">Категорий пока нет.</div>';
+  document.getElementById('tabContent').innerHTML = `
+    <div class="toolbar"><h2>Категории</h2><button class="btn-add" onclick="newCategory()">＋ Добавить категорию</button></div>
+    <div class="panel">${rows}</div>`;
+}
+function newCategory(){
+  editingCategoryId=null;
+  document.getElementById('categoryDialogTitle').textContent='Новая категория';
+  document.getElementById('categoryError').classList.remove('show');
+  document.getElementById('cName').value=''; document.getElementById('cSort').value=categories.length;
+  openOverlay('categoryDialog');
+}
+function editCategory(id){
+  const c = categories.find(x=>x.id===id); if(!c) return;
+  editingCategoryId=id;
+  document.getElementById('categoryDialogTitle').textContent='Изменить категорию';
+  document.getElementById('categoryError').classList.remove('show');
+  document.getElementById('cName').value=c.name; document.getElementById('cSort').value=c.sortOrder ?? 0;
+  openOverlay('categoryDialog');
+}
+async function saveCategory(){
+  const errEl = document.getElementById('categoryError'); errEl.classList.remove('show');
+  const payload = { name: document.getElementById('cName').value.trim(), sortOrder: +document.getElementById('cSort').value||0 };
+  if (!payload.name){ errEl.textContent='Введите название'; errEl.classList.add('show'); return; }
+  const btn = document.getElementById('cSubmit'); btn.disabled=true;
+  try {
+    if (editingCategoryId) await api('/api/admin/categories/'+editingCategoryId, {method:'PUT', body: JSON.stringify(payload)});
+    else await api('/api/admin/categories', {method:'POST', body: JSON.stringify(payload)});
+    closeOverlay('categoryDialog'); showToast('Сохранено'); await loadAll(); renderCategoriesTab();
+  } catch(err){ errEl.textContent=err.message; errEl.classList.add('show'); }
+  finally { btn.disabled=false; }
+}
+async function deleteCategory(id){
+  const c = categories.find(x=>x.id===id);
+  if (!confirm(`Удалить категорию «${c?c.name:''}»?`)) return;
+  try { await api('/api/admin/categories/'+id, {method:'DELETE'}); showToast('Удалено'); await loadAll(); renderCategoriesTab(); }
+  catch(err){ showToast(err.message, true); }
+}
+
+// ==================== ORDERS TAB ====================
+function renderOrdersTab(){
+  const rows = orders.map(o => {
+    const st = statusInfo[o.status] || statusInfo.new;
+    const date = o.createdAt ? new Date(o.createdAt).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+    const items = o.items.map(it => {
+      const extras = it.ingredients && it.ingredients.length ? ' (+' + it.ingredients.map(e=>esc(e.name)).join(', ') + ')' : '';
+      const sz = it.size ? ' · '+(sizeNames[it.size]||'') : '';
+      const tp = it.type ? ' '+(typeNames[it.type]||'').toLowerCase() : '';
+      return `${esc(it.name)}${sz}${tp}${extras} × ${it.quantity} — ${it.lineTotal} ₽`;
+    }).join('<br>');
+    const opts = statusOrder.map(s=>`<option value="${s}" ${o.status===s?'selected':''}>${statusInfo[s].label}</option>`).join('');
+    return `<div class="order-row">
+      <div class="oh"><b>Заказ №${o.id}</b><span class="status-badge ${st.cls}">${st.label}</span></div>
+      <div class="ometa">${date} · ${esc(o.customerName||'—')} · ${esc(o.phone||'—')}<br>${esc(o.address||'Адрес не указан')}${o.comment?' · «'+esc(o.comment)+'»':''}</div>
+      <div class="oitems">${items}</div>
+      <div class="ofoot">
+        <b>Итого: ${o.total} ₽</b>
+        <select class="status-select" onchange="changeStatus(${o.id}, this.value)">${opts}</select>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty">Заказов пока нет.</div>';
+  document.getElementById('tabContent').innerHTML = `
+    <div class="toolbar"><h2>Заказы</h2><button class="btn-add" onclick="loadAll().then(renderOrdersTab)">↻ Обновить</button></div>
+    <div class="panel">${rows}</div>`;
+}
+async function changeStatus(id, status){
+  try { await api('/api/admin/orders/'+id, {method:'PATCH', body: JSON.stringify({status})}); showToast('Статус обновлён'); await loadAll(); if(currentTab==='orders') renderOrdersTab(); }
+  catch(err){ showToast(err.message, true); }
+}
+
+// ==================== INIT ====================
+async function init(){
+  const savedUser = localStorage.getItem('nb_user');
+  if (token && savedUser){
+    try {
+      const u = JSON.parse(savedUser);
+      // подтверждаем токен и роль на сервере
+      me = await api('/api/auth/me');
+      if (me.role === 'admin'){ showAdmin(); return; }
+    } catch(_){}
+  }
+  showLogin();
+}
+init();
+</script>
+</body></html>

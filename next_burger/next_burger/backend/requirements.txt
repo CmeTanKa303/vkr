@@ -1,0 +1,11 @@
+# Next Burger — серверная часть (FastAPI + SQLite)
+# Стек из презентации ВКР, но в облегчённом виде: без Docker/PostgreSQL/Redis.
+# SQLAlchemy позволяет в будущем переключиться на PostgreSQL сменой строки подключения.
+
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+SQLAlchemy==2.0.36
+pydantic==2.10.4
+PyJWT==2.10.1
+bcrypt==4.2.1
+python-multipart==0.0.20
